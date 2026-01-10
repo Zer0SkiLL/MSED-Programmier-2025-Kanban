@@ -1,6 +1,6 @@
 "use client"
 
-import type { Task } from "@/app/page"
+import type { Board, Column, Task } from "@/lib/api"
 import { Card } from "./ui/card"
 import { Badge } from "./ui/badge"
 import { Calendar, GripVertical, MoreVertical, Pencil, Trash2 } from "lucide-react"
