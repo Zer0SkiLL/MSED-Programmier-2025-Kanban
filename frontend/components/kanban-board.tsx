@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import {
   DndContext,
   DragOverlay,
@@ -12,13 +12,13 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import type { Board, Column, Task, ActivityLog } from "@/app/page"
+import type { Board, Column, Task, ActivityLog } from "@/lib/api"
 import { KanbanColumn } from "./kanban-column"
 import { TaskCard } from "./task-card"
 import { Plus } from "lucide-react"
 import { Button } from "./ui/button"
 import { AddColumnDialog } from "./add-column-dialog"
-// import { useToast } from "@/hooks/use-toast"
+import { columnsApi, tasksApi } from "@/lib/api"
 
 type KanbanBoardProps = {
   board: Board
@@ -28,7 +28,9 @@ type KanbanBoardProps = {
 export function KanbanBoard({ board, onBoardChange }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [showAddColumnDialog, setShowAddColumnDialog] = useState(false)
-  // const { toast } = useToast()
+  const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null)
+  const lastOverColumnId = useRef<string | null>(null)
+  const originalColumnId = useRef<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -39,8 +41,11 @@ export function KanbanBoard({ board, onBoardChange }: KanbanBoardProps) {
   )
 
   const handleDragStart = (event: DragStartEvent) => {
+    console.log("Drag Start Event:", event)
     const { active } = event
     const task = findTask(active.id as string)
+    const column = findColumn(active.id as string)
+    originalColumnId.current = column?.id || null
     setActiveTask(task || null)
   }
 
@@ -55,134 +60,82 @@ export function KanbanBoard({ board, onBoardChange }: KanbanBoardProps) {
   }
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
+    const { over } = event
+    if (!over || !activeTask) return
 
-    const activeId = active.id as string
-    const overId = over.id as string
+    const overColumn = findColumnByTaskOrColumnId(over.id as string)
+    if (!overColumn) return
 
-    if (activeId === overId) return
+    // Avoid re-running for the same column
+    if (lastOverColumnId.current === overColumn.id) return
+    lastOverColumnId.current = overColumn.id
 
-    const activeColumn = findColumn(activeId)
-    const overColumn = findColumnByTaskOrColumnId(overId)
-
-    if (!activeColumn || !overColumn) return
-    if (activeColumn.id === overColumn.id) return
-
-    if (!canMoveTask(activeColumn.id, overColumn.id)) {
-      return
-    }
-
-    const activeTask = activeColumn.tasks.find((t) => t.id === activeId)
-    if (!activeTask) return
+    setHoveredColumnId(overColumn.id)
 
     const newColumns = board.columns.map((col) => {
-      if (col.id === activeColumn.id) {
+      // 1️⃣ Remove activeTask from every column
+      const filteredTasks = col.tasks.filter(t => t.id !== activeTask.id)
+
+      // 2️⃣ Insert into hovered column
+      if (col.id === overColumn.id) {
         return {
           ...col,
-          tasks: col.tasks.filter((t) => t.id !== activeId),
+          tasks: [...filteredTasks, activeTask],
         }
       }
-      if (col.id === overColumn.id) {
-        const overTask = col.tasks.find((t) => t.id === overId)
-        if (overTask) {
-          const overIndex = col.tasks.indexOf(overTask)
-          const newTasks = [...col.tasks]
-          newTasks.splice(overIndex, 0, activeTask)
-          return { ...col, tasks: newTasks }
-        }
-        return { ...col, tasks: [...col.tasks, activeTask] }
+
+      return {
+        ...col,
+        tasks: filteredTasks,
       }
-      return col
     })
 
     onBoardChange({ ...board, columns: newColumns })
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active } = event
     const activeId = active.id as string
 
-    if (over) {
-      const overId = over.id as string
-      const activeColumn = findColumn(activeId)
-      const overColumn = findColumnByTaskOrColumnId(overId)
+    const fromColumnId = originalColumnId.current
+    const toColumnId = lastOverColumnId.current
 
-      if (activeColumn && overColumn && activeColumn.id !== overColumn.id) {
-        if (!canMoveTask(activeColumn.id, overColumn.id)) {
-          const allowedColumns = board.workflowRules
-            ?.find((r) => r.fromColumnId === activeColumn.id)
-            ?.toColumnIds.map((id) => board.columns.find((c) => c.id === id)?.title)
-            .join(", ")
+    if (!fromColumnId || !toColumnId) return
+    if (fromColumnId === toColumnId) return
+    if (!canMoveTask(fromColumnId, toColumnId)) return
 
-          // toast({
-          //   title: "Move not allowed",
-          //   description: `Tasks from "${activeColumn.title}" can only be moved to: ${allowedColumns}`,
-          //   variant: "destructive",
-          // })
+    const task = findTask(activeId)
+    if (!task) return
 
-          setActiveTask(null)
-          return
-        }
-
-        const task = findTask(activeId)
-        if (task) {
-          const logEntry: ActivityLog = {
-            id: Date.now().toString(),
-            taskId: task.id,
-            boardId: board.id,
-            action: "moved",
-            description: `Moved from "${activeColumn.title}" to "${overColumn.title}"`,
-            timestamp: new Date().toISOString(),
-            user: "Current User",
-          }
-
-          const updatedTask = {
-            ...task,
-            activityLog: [...(task.activityLog || []), logEntry],
-          }
-
-          const newColumns = board.columns.map((col) => ({
+    try {
+      await tasksApi.move(
+        board.id,
+        fromColumnId,
+        task.id,
+        { targetColumnId: toColumnId, position: 0 }
+      )
+    } catch (e) {
+      console.error(e)
+      // ❗ rollback if needed - revert to original state
+      const newColumns = board.columns.map((col) => {
+        if (col.id === toColumnId) {
+          return {
             ...col,
-            tasks: col.tasks.map((t) => (t.id === task.id ? updatedTask : t)),
-          }))
-
-          onBoardChange({ ...board, columns: newColumns })
+            tasks: col.tasks.filter(t => t.id !== activeId),
+          }
         }
-      }
+        if (col.id === fromColumnId) {
+          return {
+            ...col,
+            tasks: [...col.tasks, task],
+          }
+        }
+        return col
+      })
+      onBoardChange({ ...board, columns: newColumns })
     }
 
     setActiveTask(null)
-
-    if (!over) return
-
-    const overId = over.id as string
-
-    if (activeId === overId) return
-
-    const activeColumn = findColumn(activeId)
-    const overColumn = findColumnByTaskOrColumnId(overId)
-
-    if (!activeColumn || !overColumn) return
-
-    if (activeColumn.id === overColumn.id) {
-      const activeTask = activeColumn.tasks.find((t) => t.id === activeId)
-      const overTask = activeColumn.tasks.find((t) => t.id === overId)
-
-      if (!activeTask || !overTask) return
-
-      const activeIndex = activeColumn.tasks.indexOf(activeTask)
-      const overIndex = activeColumn.tasks.indexOf(overTask)
-
-      if (activeIndex !== overIndex) {
-        const newTasks = [...activeColumn.tasks]
-        newTasks.splice(activeIndex, 1)
-        newTasks.splice(overIndex, 0, activeTask)
-
-        const newColumns = board.columns.map((col) => (col.id === activeColumn.id ? { ...col, tasks: newTasks } : col))
-        onBoardChange({ ...board, columns: newColumns })
-      }
-    }
   }
 
   const findTask = (taskId: string): Task | undefined => {
@@ -200,23 +153,33 @@ export function KanbanBoard({ board, onBoardChange }: KanbanBoardProps) {
     return board.columns.find((col) => col.id === id) || board.columns.find((col) => col.tasks.some((t) => t.id === id))
   }
 
-  const handleAddColumn = (title: string) => {
-    const newColumn: Column = {
-      id: Date.now().toString(),
-      title,
-      tasks: [],
+  const handleAddColumn = async (title: string) => {
+    try {
+      const newColumn = await columnsApi.create(board.id, { title })
+      onBoardChange({ ...board, columns: [...board.columns, newColumn] })
+    } catch (error) {
+      console.error("Error creating column:", error)
     }
-    onBoardChange({ ...board, columns: [...board.columns, newColumn] })
   }
 
-  const handleUpdateColumn = (columnId: string, newTitle: string) => {
-    const newColumns = board.columns.map((col) => (col.id === columnId ? { ...col, title: newTitle } : col))
-    onBoardChange({ ...board, columns: newColumns })
+  const handleUpdateColumn = async (columnId: string, newTitle: string) => {
+    try {
+      const updatedColumn = await columnsApi.update(board.id, columnId, { title: newTitle })
+      const newColumns = board.columns.map((col) => (col.id === columnId ? updatedColumn : col))
+      onBoardChange({ ...board, columns: newColumns })
+    } catch (error) {
+      console.error("Error updating column:", error)
+    }
   }
 
-  const handleDeleteColumn = (columnId: string) => {
-    const newColumns = board.columns.filter((col) => col.id !== columnId)
-    onBoardChange({ ...board, columns: newColumns })
+  const handleDeleteColumn = async (columnId: string) => {
+    try {
+      await columnsApi.delete(board.id, columnId)
+      const newColumns = board.columns.filter((col) => col.id !== columnId)
+      onBoardChange({ ...board, columns: newColumns })
+    } catch (error) {
+      console.error("Error deleting column:", error)
+    }
   }
 
   return (
