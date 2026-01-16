@@ -23,7 +23,7 @@ export function BoardSelector({ boards, currentBoardId, onBoardChange, onAddBoar
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="gap-2 bg-transparent">
-            <span className="font-medium">{currentBoard?.name ?? (boards.length === 0 ? "Create New Board" : "")}</span>
+            <span className="font-medium">{currentBoard?.name ?? (boards.length === 0 ? "Select a Board" : "")}</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
