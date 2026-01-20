@@ -166,8 +166,7 @@ class TaskServiceTest {
         every { columnService.getColumnById("c2") } returns Column(
             id = "c2",
             boardId = "b1",
-            title = "Doing",
-            workflowRules = emptyList()
+            title = "Doing"
         )
         every { boardService.getBoardById("b1") } returns Board(id = "b1", name = "B")
         every { taskRepository.countByColumnId("c2") } returns 5L
@@ -180,26 +179,6 @@ class TaskServiceTest {
         assertEquals("c2", moved?.columnId)
         assertEquals(5, moved?.position)
         verify { activityLogService.logActivity("b1", "TASK_MOVED", any(), "t1", "c2") }
-    }
-
-    @Test
-    fun `moveTask enforces requires_assignee rule`() {
-        val existing = Task(id = "t1", boardId = "b1", columnId = "c1", title = "T", position = 0, assignee = null)
-        every { taskRepository.findById("t1") } returns Optional.of(existing)
-        every { columnService.getColumnById("c1") } returns Column(id = "c1", boardId = "b1", title = "Todo")
-        every { columnService.getColumnById("c2") } returns Column(
-            id = "c2",
-            boardId = "b1",
-            title = "Doing",
-            workflowRules = listOf("requires_assignee")
-        )
-        every { boardService.getBoardById("b1") } returns Board(id = "b1", name = "B")
-
-        val ex = assertThrows(IllegalArgumentException::class.java) {
-            service.moveTask("t1", "c2", null)
-        }
-        assertTrue(ex.message!!.contains("assignee"))
-        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test
