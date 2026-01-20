@@ -58,8 +58,7 @@ class ColumnController(
             title = request.title,
             description = null,
             color = null,
-            position = null,
-            workflowRules = null
+            position = null
         )
         val response = ColumnResponse(
             id = column.id ?: "",
@@ -82,8 +81,7 @@ class ColumnController(
             title = request.title,
             description = null,
             color = null,
-            position = null,
-            workflowRules = null
+            position = null
         )
         return if (column != null) {
             val response = ColumnResponse(

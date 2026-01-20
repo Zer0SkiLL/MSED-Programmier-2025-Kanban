@@ -142,10 +142,7 @@ class TaskService(
         val targetColumn = columnService.getColumnById(targetColumnId) ?: return null
         val board = boardService.getBoardById(task.boardId) ?: return null
         
-        // Validate workflow rules if moving to a different column
-        if (task.columnId != targetColumnId) {
-            validateWorkflowRules(task, sourceColumn, targetColumn)
-        }
+        // Moving to a different column proceeds without workflow checks
         
         val updatedTask = Task(
             id = task.id,
@@ -198,23 +195,4 @@ class TaskService(
         return taskRepository.save(updatedTask)
     }
 
-    private fun validateWorkflowRules(
-        task: Task,
-        sourceColumn: org.widmerkillenberger.backend.model.entity.Column,
-        targetColumn: org.widmerkillenberger.backend.model.entity.Column
-    ) {
-        // Check if target column has workflow rules
-        if (targetColumn.workflowRules.isNotEmpty()) {
-            // Example: Check if task has required fields
-            if (targetColumn.workflowRules.contains("requires_assignee") && task.assignee.isNullOrBlank()) {
-                throw IllegalArgumentException("Task must have an assignee to move to '${targetColumn.title}'")
-            }
-            if (targetColumn.workflowRules.contains("requires_description") && task.description.isNullOrBlank()) {
-                throw IllegalArgumentException("Task must have a description to move to '${targetColumn.title}'")
-            }
-            if (targetColumn.workflowRules.contains("requires_tags") && (task.tags == null || task.tags.isEmpty())) {
-                throw IllegalArgumentException("Task must have tags to move to '${targetColumn.title}'")
-            }
-        }
-    }
 }
