@@ -10,7 +10,6 @@ data class Board(
     val name: String,
     val description: String? = null,
     val columns: List<Column> = emptyList(),
-    val workflowRules: List<WorkflowRule>? = null,
     val activityLog: List<ActivityLog>? = null,
     val createdAt: Long? = null,
     val updatedAt: Long? = null

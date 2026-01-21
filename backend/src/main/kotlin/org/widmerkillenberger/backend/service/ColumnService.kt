@@ -24,8 +24,7 @@ class ColumnService(
         title: String,
         description: String?,
         color: String?,
-        position: Int?,
-        workflowRules: List<String>?
+        position: Int?
     ): Column {
         val board = boardService.getBoardById(boardId)
             ?: throw IllegalArgumentException("Board not found with id: $boardId")
@@ -37,7 +36,6 @@ class ColumnService(
             description = description,
             color = color ?: "#3b82f6",
             position = position ?: (columnRepository.countByBoardId(boardId).toInt()),
-            workflowRules = workflowRules ?: emptyList(),
             createdAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis()
         )
@@ -59,8 +57,7 @@ class ColumnService(
         title: String?,
         description: String?,
         color: String?,
-        position: Int?,
-        workflowRules: List<String>?
+        position: Int?
     ): Column? {
         val column = columnRepository.findById(columnId).orElse(null) ?: return null
         val board = boardService.getBoardById(column.boardId) ?: return null
@@ -72,7 +69,6 @@ class ColumnService(
             description = description ?: column.description,
             color = color ?: column.color,
             position = position ?: column.position,
-            workflowRules = workflowRules ?: column.workflowRules,
             tasks = column.tasks,
             createdAt = column.createdAt,
             updatedAt = System.currentTimeMillis()
@@ -116,7 +112,6 @@ class ColumnService(
             description = column.description,
             color = column.color,
             position = newPosition,
-            workflowRules = column.workflowRules,
             tasks = column.tasks,
             createdAt = column.createdAt,
             updatedAt = System.currentTimeMillis()

@@ -34,7 +34,6 @@ class BoardService(
             id = board.id,
             name = name,
             description = description,
-            workflowRules = board.workflowRules,
             activityLog = board.activityLog,
             createdAt = board.createdAt,
             updatedAt = System.currentTimeMillis()

@@ -63,7 +63,7 @@ class ColumnControllerTest {
 
     @Test
     fun `createColumn returns 201`() {
-        every { columnService.createColumn("b1", "New Col", null, null, null, null) } returns Column(
+        every { columnService.createColumn("b1", "New Col", null, null, null) } returns Column(
             id = "new", boardId = "b1", title = "New Col", position = 2
         )
 
@@ -80,7 +80,7 @@ class ColumnControllerTest {
 
     @Test
     fun `updateColumn returns 200 when found`() {
-        every { columnService.updateColumn("c1", "Renamed", null, null, null, null) } returns Column(
+        every { columnService.updateColumn("c1", "Renamed", null, null, null) } returns Column(
             id = "c1", boardId = "b1", title = "Renamed", position = 0
         )
 
@@ -96,7 +96,7 @@ class ColumnControllerTest {
 
     @Test
     fun `updateColumn returns 404 when not found`() {
-        every { columnService.updateColumn("missing", any(), any(), any(), any(), any()) } returns null
+        every { columnService.updateColumn("missing", any(), any(), any(), any()) } returns null
 
         val body = """
             {"title":"Name"}
