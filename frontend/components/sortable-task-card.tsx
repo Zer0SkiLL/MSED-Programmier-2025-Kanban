@@ -5,11 +5,12 @@ import { TaskCard } from "./task-card"
 
 type SortableTaskCardProps = {
   task: Task
+  boardId: string
   onUpdate: (taskId: string, task: Partial<Task>) => void
   onDelete: (taskId: string) => void
 }
 
-export function SortableTaskCard({ task, onUpdate, onDelete }: SortableTaskCardProps) {
+export function SortableTaskCard({ task, boardId, onUpdate, onDelete }: SortableTaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
 
   const style = {
@@ -20,7 +21,7 @@ export function SortableTaskCard({ task, onUpdate, onDelete }: SortableTaskCardP
 
   return (
     <div ref={setNodeRef} style={style}>
-      <TaskCard task={task} dragHandleProps={{ ...attributes, ...listeners }} onUpdate={onUpdate} onDelete={onDelete} />
+      <TaskCard task={task} boardId={boardId} dragHandleProps={{ ...attributes, ...listeners }} onUpdate={onUpdate} onDelete={onDelete} />
     </div>
   )
 }

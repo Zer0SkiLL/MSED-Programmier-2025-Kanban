@@ -109,8 +109,6 @@ export function KanbanBoard({ board, onBoardChange }: KanbanBoardProps) {
 
     try {
       await tasksApi.move(
-          board.id,
-          fromColumnId,
           task.id,
           { targetColumnId: toColumnId, position: 0 }
       )
@@ -215,7 +213,7 @@ export function KanbanBoard({ board, onBoardChange }: KanbanBoardProps) {
             </div>
           </div>
 
-          <DragOverlay>{activeTask ? <TaskCard task={activeTask} isOverlay /> : null}</DragOverlay>
+          <DragOverlay>{activeTask ? <TaskCard task={activeTask} boardId={board.id} isOverlay /> : null}</DragOverlay>
         </DndContext>
 
         <AddColumnDialog open={showAddColumnDialog} onOpenChange={setShowAddColumnDialog} onAdd={handleAddColumn} />

@@ -60,8 +60,7 @@ class ColumnServiceTest {
             activityLogService.logActivity(
                 boardId = "b1",
                 action = "COLUMN_CREATED",
-                description = any(),
-                columnId = "newC"
+                description = any()
             )
         }
     }
@@ -97,7 +96,7 @@ class ColumnServiceTest {
         assertNotNull(updated)
         assertEquals("New", updated?.title)
         assertEquals(1, updated?.position)
-        verify { activityLogService.logActivity("b1", "COLUMN_UPDATED", any(), null, "c1") }
+        verify { activityLogService.logActivity("b1", "COLUMN_UPDATED", any()) }
     }
 
     @Test
@@ -119,7 +118,7 @@ class ColumnServiceTest {
 
         assertTrue(ok)
         verify { columnRepository.deleteById("c1") }
-        verify { activityLogService.logActivity("b1", "COLUMN_DELETED", any(), null, "c1") }
+        verify { activityLogService.logActivity("b1", "COLUMN_DELETED", any()) }
     }
 
     @Test

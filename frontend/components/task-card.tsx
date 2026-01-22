@@ -12,6 +12,7 @@ import { EditTaskDialog } from "./edit-task-dialog"
 
 type TaskCardProps = {
   task: Task
+  boardId?: string
   isOverlay?: boolean
   dragHandleProps?: any
   onUpdate?: (taskId: string, task: Partial<Task>) => void
@@ -24,7 +25,7 @@ const priorityColors = {
   high: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
 }
 
-export function TaskCard({ task, isOverlay, dragHandleProps, onUpdate, onDelete }: TaskCardProps) {
+export function TaskCard({ task, boardId, isOverlay, dragHandleProps, onUpdate, onDelete }: TaskCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
 
   return (
@@ -120,8 +121,8 @@ export function TaskCard({ task, isOverlay, dragHandleProps, onUpdate, onDelete 
           </div>
         </Card>
 
-        {onUpdate && (
-            <EditTaskDialog open={showEditDialog} onOpenChange={setShowEditDialog} task={task} onUpdate={onUpdate} />
+        {onUpdate && boardId && (
+            <EditTaskDialog open={showEditDialog} onOpenChange={setShowEditDialog} task={task} boardId={boardId} onUpdate={onUpdate} />
         )}
       </>
   )

@@ -9,7 +9,6 @@ data class Board(
     val id: String? = null,
     val name: String,
     val description: String? = null,
-    val columns: List<Column> = emptyList(),
     val activityLog: List<ActivityLog>? = null,
     val createdAt: Long? = null,
     val updatedAt: Long? = null

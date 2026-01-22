@@ -8,13 +8,12 @@ import org.springframework.stereotype.Service
 class ActivityLogService(
     private val activityLogRepository: ActivityLogRepository
 ) {
-    fun createLog(taskId: String?, boardId: String?, action: String, description: String, user: String): ActivityLog {
+    fun createLog(taskId: String?, boardId: String?, action: String, description: String): ActivityLog {
         val log = ActivityLog(
             taskId = taskId,
             boardId = boardId,
             action = action,
-            description = description,
-            user = user
+            description = description
         )
         return activityLogRepository.save(log)
     }
@@ -23,8 +22,7 @@ class ActivityLogService(
         boardId: String,
         action: String,
         description: String,
-        taskId: String? = null,
-        columnId: String? = null
+        taskId: String? = null
     ): ActivityLog {
         val log = ActivityLog(
             id = null,
@@ -32,8 +30,7 @@ class ActivityLogService(
             taskId = taskId,
             action = action,
             description = description,
-            timestamp = System.currentTimeMillis(),
-            user = "system"
+            timestamp = System.currentTimeMillis()
         )
         return activityLogRepository.save(log)
     }

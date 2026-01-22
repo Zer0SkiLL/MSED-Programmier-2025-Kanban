@@ -45,8 +45,7 @@ class ColumnService(
         activityLogService.logActivity(
             boardId = boardId,
             action = "COLUMN_CREATED",
-            description = "Column '${title}' was created in board '${board.name}'",
-            columnId = savedColumn.id
+            description = "Column '${title}' was created in board '${board.name}'"
         )
         
         return savedColumn
@@ -69,7 +68,6 @@ class ColumnService(
             description = description ?: column.description,
             color = color ?: column.color,
             position = position ?: column.position,
-            tasks = column.tasks,
             createdAt = column.createdAt,
             updatedAt = System.currentTimeMillis()
         )
@@ -79,8 +77,7 @@ class ColumnService(
         activityLogService.logActivity(
             boardId = column.boardId,
             action = "COLUMN_UPDATED",
-            description = "Column '${savedColumn.title}' was updated in board '${board.name}'",
-            columnId = columnId
+            description = "Column '${savedColumn.title}' was updated in board '${board.name}'"
         )
         
         return savedColumn
@@ -96,8 +93,7 @@ class ColumnService(
         activityLogService.logActivity(
             boardId = column.boardId,
             action = "COLUMN_DELETED",
-            description = "Column '${column.title}' was deleted from board '${board.name}'",
-            columnId = columnId
+            description = "Column '${column.title}' was deleted from board '${board.name}'"
         )
         
         return true
@@ -112,7 +108,6 @@ class ColumnService(
             description = column.description,
             color = column.color,
             position = newPosition,
-            tasks = column.tasks,
             createdAt = column.createdAt,
             updatedAt = System.currentTimeMillis()
         )

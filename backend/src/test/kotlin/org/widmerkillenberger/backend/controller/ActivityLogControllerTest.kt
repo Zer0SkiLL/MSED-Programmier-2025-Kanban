@@ -31,8 +31,7 @@ class ActivityLogControllerTest {
                 taskId = "t1",
                 action = "CREATED",
                 description = "Task created",
-                timestamp = 1,
-                user = "system"
+                timestamp = 1
             ),
             ActivityLog(
                 id = "l2",
@@ -40,12 +39,11 @@ class ActivityLogControllerTest {
                 taskId = null,
                 action = "COLUMN_CREATED",
                 description = "Column created",
-                timestamp = 2,
-                user = "system"
+                timestamp = 2
             )
         )
 
-        mockMvc.perform(get("/api/activity-logs/board/b1"))
+        mockMvc.perform(get("/api/boards/b1/activity-logs"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$", hasSize<Any>(2)))
             .andExpect(jsonPath("$[0].id").value("l1"))
@@ -62,12 +60,11 @@ class ActivityLogControllerTest {
                 taskId = "t1",
                 action = "UPDATED",
                 description = "Task updated",
-                timestamp = 10,
-                user = "system"
+                timestamp = 10
             )
         )
 
-        mockMvc.perform(get("/api/activity-logs/task/t1"))
+        mockMvc.perform(get("/api/boards/b1/tasks/t1/activity-logs"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$", hasSize<Any>(1)))
             .andExpect(jsonPath("$[0].taskId").value("t1"))

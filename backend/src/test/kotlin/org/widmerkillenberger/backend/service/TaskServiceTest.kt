@@ -49,7 +49,7 @@ class TaskServiceTest {
         every { boardService.getBoardById("b1") } returns Board(id = "b1", name = "Board")
         every { taskRepository.countByColumnId("c1") } returns 3L
         every { taskRepository.save(any()) } answers { firstArg<Task>().copy(id = "newT") }
-        every { activityLogService.logActivity(any(), any(), any(), any(), any()) } returns mockk()
+        every { activityLogService.logActivity(any(), any(), any(), any()) } returns mockk()
 
         val created = service.createTask(
             boardId = "b1",
@@ -66,7 +66,7 @@ class TaskServiceTest {
         assertEquals("newT", created.id)
         assertEquals(3, created.position)
         assertEquals("medium", created.priority)
-        verify { activityLogService.logActivity("b1", "TASK_CREATED", any(), created.id, "c1") }
+        verify { activityLogService.logActivity("b1", "TASK_CREATED", any(), created.id) }
     }
 
     @Test
@@ -87,7 +87,7 @@ class TaskServiceTest {
         every { columnService.getColumnById("c1") } returns Column(id = "c1", boardId = "b1", title = "Todo")
         every { boardService.getBoardById("b1") } returns Board(id = "b1", name = "Board")
         every { taskRepository.save(any()) } answers { firstArg() }
-        every { activityLogService.logActivity(any(), any(), any(), any(), any()) } returns mockk()
+        every { activityLogService.logActivity(any(), any(), any(), any()) } returns mockk()
 
         val updated = service.updateTask(
             taskId = "t1",
@@ -108,7 +108,7 @@ class TaskServiceTest {
         assertEquals("in_progress", updated?.status)
         assertEquals("123", updated?.dueDate)
         assertEquals(listOf("x"), updated?.tags)
-        verify { activityLogService.logActivity("b1", "TASK_UPDATED", any(), "t1", "c1") }
+        verify { activityLogService.logActivity("b1", "TASK_UPDATED", any(), "t1") }
     }
 
     @Test
@@ -142,12 +142,12 @@ class TaskServiceTest {
         )
         every { columnService.getColumnById("c1") } returns Column(id = "c1", boardId = "b1", title = "Todo")
         every { boardService.getBoardById("b1") } returns Board(id = "b1", name = "Board")
-        every { activityLogService.logActivity(any(), any(), any(), any(), any()) } returns mockk()
+        every { activityLogService.logActivity(any(), any(), any(), any()) } returns mockk()
 
         val ok = service.deleteTask("t1")
         assertTrue(ok)
         verify { taskRepository.deleteById("t1") }
-        verify { activityLogService.logActivity("b1", "TASK_DELETED", any(), "t1", "c1") }
+        verify { activityLogService.logActivity("b1", "TASK_DELETED", any(), "t1") }
     }
 
     @Test
@@ -171,14 +171,14 @@ class TaskServiceTest {
         every { boardService.getBoardById("b1") } returns Board(id = "b1", name = "B")
         every { taskRepository.countByColumnId("c2") } returns 5L
         every { taskRepository.save(any()) } answers { firstArg<Task>() }
-        every { activityLogService.logActivity(any(), any(), any(), any(), any()) } returns mockk()
+        every { activityLogService.logActivity(any(), any(), any(), any()) } returns mockk()
 
         val moved = service.moveTask("t1", "c2", null)
 
         assertNotNull(moved)
         assertEquals("c2", moved?.columnId)
         assertEquals(5, moved?.position)
-        verify { activityLogService.logActivity("b1", "TASK_MOVED", any(), "t1", "c2") }
+        verify { activityLogService.logActivity("b1", "TASK_MOVED", any(), "t1") }
     }
 
     @Test

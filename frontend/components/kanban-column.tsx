@@ -43,7 +43,7 @@ export function KanbanColumn({ column, board, onBoardChange, onUpdateColumn, onD
 
   const handleUpdateTask = async (taskId: string, updatedTask: Partial<Task>) => {
     try {
-      const updated = await tasksApi.update(board.id, column.id, taskId, updatedTask)
+      const updated = await tasksApi.update(taskId, updatedTask)
       const newColumns = board.columns.map((col) => ({
         ...col,
         tasks: col.tasks.map((t) => (t.id === taskId ? updated : t)),
@@ -56,7 +56,7 @@ export function KanbanColumn({ column, board, onBoardChange, onUpdateColumn, onD
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      await tasksApi.delete(board.id, column.id, taskId)
+      await tasksApi.delete(taskId)
       const newColumns = board.columns.map((col) => ({
         ...col,
         tasks: col.tasks.filter((t) => t.id !== taskId),
@@ -99,7 +99,7 @@ export function KanbanColumn({ column, board, onBoardChange, onUpdateColumn, onD
           <div ref={setNodeRef} className="flex-1 overflow-y-auto space-y-3 min-h-[100px]">
             <SortableContext items={column.tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
               {column.tasks.map((task) => (
-                  <SortableTaskCard key={task.id} task={task} onUpdate={handleUpdateTask} onDelete={handleDeleteTask} />
+                  <SortableTaskCard key={task.id} task={task} boardId={board.id} onUpdate={handleUpdateTask} onDelete={handleDeleteTask} />
               ))}
             </SortableContext>
           </div>
