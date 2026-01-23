@@ -37,7 +37,7 @@ class TaskService(
     ): Task {
         val column = columnService.getColumnById(columnId)
             ?: throw IllegalArgumentException("Column not found with id: $columnId")
-        val board = boardService.getBoardById(boardId)
+        boardService.getBoardById(boardId)
             ?: throw IllegalArgumentException("Board not found with id: $boardId")
         
         val task = Task(
@@ -62,8 +62,7 @@ class TaskService(
             boardId = boardId,
             action = "TASK_CREATED",
             description = "Task '${title}' was created in column '${column.title}'",
-            taskId = savedTask.id,
-            columnId = columnId
+            taskId = savedTask.id
         )
         
         return savedTask
@@ -81,7 +80,7 @@ class TaskService(
     ): Task? {
         val task = taskRepository.findById(taskId).orElse(null) ?: return null
         val column = columnService.getColumnById(task.columnId) ?: return null
-        val board = boardService.getBoardById(task.boardId) ?: return null
+        boardService.getBoardById(task.boardId) ?: return null
         
         val updatedTask = Task(
             id = task.id,
@@ -106,8 +105,7 @@ class TaskService(
             boardId = task.boardId,
             action = "TASK_UPDATED",
             description = "Task '${savedTask.title}' was updated in column '${column.title}'",
-            taskId = taskId,
-            columnId = task.columnId
+            taskId = taskId
         )
         
         return savedTask
@@ -116,7 +114,7 @@ class TaskService(
     fun deleteTask(taskId: String): Boolean {
         val task = taskRepository.findById(taskId).orElse(null) ?: return false
         val column = columnService.getColumnById(task.columnId) ?: return false
-        val board = boardService.getBoardById(task.boardId) ?: return false
+        boardService.getBoardById(task.boardId) ?: return false
         
         taskRepository.deleteById(taskId)
         
@@ -125,8 +123,7 @@ class TaskService(
             boardId = task.boardId,
             action = "TASK_DELETED",
             description = "Task '${task.title}' was deleted from column '${column.title}'",
-            taskId = taskId,
-            columnId = task.columnId
+            taskId = taskId
         )
         
         return true
@@ -140,7 +137,7 @@ class TaskService(
         val task = taskRepository.findById(taskId).orElse(null) ?: return null
         val sourceColumn = columnService.getColumnById(task.columnId) ?: return null
         val targetColumn = columnService.getColumnById(targetColumnId) ?: return null
-        val board = boardService.getBoardById(task.boardId) ?: return null
+        boardService.getBoardById(task.boardId) ?: return null
         
         // Moving to a different column proceeds without workflow checks
         
@@ -167,8 +164,7 @@ class TaskService(
             boardId = task.boardId,
             action = "TASK_MOVED",
             description = "Task '${savedTask.title}' was moved from '${sourceColumn.title}' to '${targetColumn.title}'",
-            taskId = taskId,
-            columnId = targetColumnId
+            taskId = taskId
         )
         
         return savedTask

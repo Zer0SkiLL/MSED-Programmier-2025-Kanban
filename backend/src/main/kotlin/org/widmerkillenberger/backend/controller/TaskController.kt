@@ -15,7 +15,6 @@ class TaskController(
 
     @GetMapping
     fun getTasksByColumnId(
-        @PathVariable boardId: String,
         @PathVariable columnId: String
     ): ResponseEntity<List<TaskResponse>> {
         val tasks = taskService.getTasksByColumnId(columnId)
@@ -30,7 +29,17 @@ class TaskController(
                 tags = task.tags ?: emptyList(),
                 dueDate = task.dueDate,
                 createdAt = task.createdAt?.toString() ?: "",
-                updatedAt = task.updatedAt?.toString() ?: ""
+                updatedAt = task.updatedAt?.toString() ?: "",
+                activityLog = task.activityLog?.map { log ->
+                    ActivityLogDTO(
+                        id = log.id,
+                        boardId = log.boardId ?: "",
+                        taskId = log.taskId,
+                        action = log.action,
+                        description = log.description,
+                        timestamp = log.timestamp
+                    )
+                } ?: emptyList()
             )
         }
         return ResponseEntity.ok(responses)
@@ -38,8 +47,6 @@ class TaskController(
 
     @GetMapping("/{taskId}")
     fun getTaskById(
-        @PathVariable boardId: String,
-        @PathVariable columnId: String,
         @PathVariable taskId: String
     ): ResponseEntity<TaskResponse> {
         val task = taskService.getTaskById(taskId)
@@ -54,7 +61,17 @@ class TaskController(
                 tags = task.tags ?: emptyList(),
                 dueDate = task.dueDate,
                 createdAt = task.createdAt?.toString() ?: "",
-                updatedAt = task.updatedAt?.toString() ?: ""
+                updatedAt = task.updatedAt?.toString() ?: "",
+                activityLog = task.activityLog?.map { log ->
+                    ActivityLogDTO(
+                        id = log.id,
+                        boardId = log.boardId ?: "",
+                        taskId = log.taskId,
+                        action = log.action,
+                        description = log.description,
+                        timestamp = log.timestamp
+                    )
+                } ?: emptyList()
             )
             ResponseEntity.ok(response)
         } else {
@@ -76,7 +93,7 @@ class TaskController(
             assignee = request.assignee,
             priority = request.priority,
             dueDate = request.dueDate?.toLongOrNull(),
-            tags = request. tags,
+            tags = request.tags,
             position = null
         )
         val response = TaskResponse(
@@ -89,15 +106,23 @@ class TaskController(
             tags = task.tags ?: emptyList(),
             dueDate = task.dueDate,
             createdAt = task.createdAt?.toString() ?: "",
-            updatedAt = task.updatedAt?.toString() ?: ""
+            updatedAt = task.updatedAt?.toString() ?: "",
+            activityLog = task.activityLog?.map { log ->
+                ActivityLogDTO(
+                    id = log.id,
+                    boardId = log.boardId ?: "",
+                    taskId = log.taskId,
+                    action = log.action,
+                    description = log.description,
+                    timestamp = log.timestamp
+                )
+            } ?: emptyList()
         )
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @PutMapping("/{taskId}")
     fun updateTask(
-        @PathVariable boardId: String,
-        @PathVariable columnId: String,
         @PathVariable taskId: String,
         @Valid @RequestBody request: UpdateTaskRequest
     ): ResponseEntity<TaskResponse> {
@@ -122,7 +147,17 @@ class TaskController(
                 tags = task.tags ?: emptyList(),
                 dueDate = task.dueDate,
                 createdAt = task.createdAt?.toString() ?: "",
-                updatedAt = task.updatedAt?.toString() ?: ""
+                updatedAt = task.updatedAt?.toString() ?: "",
+                activityLog = task.activityLog?.map { log ->
+                    ActivityLogDTO(
+                        id = log.id,
+                        boardId = log.boardId ?: "",
+                        taskId = log.taskId,
+                        action = log.action,
+                        description = log.description,
+                        timestamp = log.timestamp
+                    )
+                } ?: emptyList()
             )
             ResponseEntity.ok(response)
         } else {
@@ -132,8 +167,6 @@ class TaskController(
 
     @DeleteMapping("/{taskId}")
     fun deleteTask(
-        @PathVariable boardId: String,
-        @PathVariable columnId: String,
         @PathVariable taskId: String
     ): ResponseEntity<Void> {
         val deleted = taskService.deleteTask(taskId)
@@ -146,8 +179,6 @@ class TaskController(
 
     @PatchMapping("/{taskId}/move")
     fun moveTask(
-        @PathVariable boardId: String,
-        @PathVariable columnId: String,
         @PathVariable taskId: String,
         @Valid @RequestBody request: MoveTaskRequest
     ): ResponseEntity<TaskResponse> {

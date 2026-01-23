@@ -7,7 +7,6 @@ export interface ActivityLog {
     action: string
     description: string
     timestamp: string
-    user: string
 }
 
 export interface Task {
@@ -197,8 +196,8 @@ export const tasksApi = {
         return handleResponse(response)
     },
 
-    update: async (boardId: string, columnId: string, taskId: string, data: UpdateTaskRequest): Promise<Task> => {
-        const response = await fetch(`${API_BASE_URL}/api/boards/${boardId}/columns/${columnId}/tasks/${taskId}`, {
+    update: async (taskId: string, data: UpdateTaskRequest): Promise<Task> => {
+        const response = await fetch(`${API_BASE_URL}/api/boards/dummy/columns/dummy/tasks/${taskId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -206,15 +205,15 @@ export const tasksApi = {
         return handleResponse(response)
     },
 
-    delete: async (boardId: string, columnId: string, taskId: string): Promise<void> => {
-        const response = await fetch(`${API_BASE_URL}/api/boards/${boardId}/columns/${columnId}/tasks/${taskId}`, {
+    delete: async (taskId: string): Promise<void> => {
+        const response = await fetch(`${API_BASE_URL}/api/boards/dummy/columns/dummy/tasks/${taskId}`, {
             method: 'DELETE',
         })
         return handleResponse(response)
     },
 
-    move: async (boardId: string, columnId: string, taskId: string, data: MoveTaskRequest): Promise<Task> => {
-        const response = await fetch(`${API_BASE_URL}/api/boards/${boardId}/columns/${columnId}/tasks/${taskId}/move`, {
+    move: async (taskId: string, data: MoveTaskRequest): Promise<Task> => {
+        const response = await fetch(`${API_BASE_URL}/api/boards/dummy/columns/dummy/tasks/${taskId}/move`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -230,8 +229,8 @@ export const activityLogsApi = {
         return handleResponse(response)
     },
 
-    getForTask: async (boardId: string, taskId: string): Promise<ActivityLog[]> => {
-        const response = await fetch(`${API_BASE_URL}/api/boards/${boardId}/tasks/${taskId}/activity-logs`)
+    getForTask: async (taskId: string): Promise<ActivityLog[]> => {
+        const response = await fetch(`${API_BASE_URL}/api/boards/dummy/tasks/${taskId}/activity-logs`)
         return handleResponse(response)
     },
 }

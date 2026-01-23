@@ -17,13 +17,12 @@ class ActivityLogServiceTest {
     fun `createLog saves custom log`() {
         every { repo.save(any()) } answers { firstArg() }
 
-        val saved = service.createLog(taskId = "t1", boardId = "b1", action = "X", description = "desc", user = "me")
+        val saved = service.createLog(taskId = "t1", boardId = "b1", action = "X", description = "desc")
 
         assertEquals("t1", saved.taskId)
         assertEquals("b1", saved.boardId)
         assertEquals("X", saved.action)
         assertEquals("desc", saved.description)
-        assertEquals("me", saved.user)
         verify { repo.save(any()) }
     }
 
@@ -32,7 +31,7 @@ class ActivityLogServiceTest {
         every { repo.save(any()) } answers { firstArg<ActivityLog>().copy(id = "id1") }
 
         val saved =
-            service.logActivity(boardId = "b1", action = "ACT", description = "d", taskId = "t1", columnId = "c1")
+            service.logActivity(boardId = "b1", action = "ACT", description = "d", taskId = "t1")
 
         assertEquals("id1", saved.id)
         assertEquals("b1", saved.boardId)
@@ -40,10 +39,7 @@ class ActivityLogServiceTest {
         assertEquals("ACT", saved.action)
         assertEquals("d", saved.description)
         verify {
-            repo.save(withArg { log ->
-                // user is system and timestamp set
-                assertEquals("system", log.user)
-            })
+            repo.save(any())
         }
     }
 

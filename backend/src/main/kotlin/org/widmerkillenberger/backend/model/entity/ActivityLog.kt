@@ -11,6 +11,5 @@ data class ActivityLog(
     val boardId: String? = null,
     val action: String,
     val description: String,
-    val timestamp: Long = System.currentTimeMillis(),
-    val user: String
+    val timestamp: Long = System.currentTimeMillis()
 )

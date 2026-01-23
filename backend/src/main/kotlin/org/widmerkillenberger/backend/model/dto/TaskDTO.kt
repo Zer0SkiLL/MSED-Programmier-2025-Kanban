@@ -32,5 +32,6 @@ data class TaskResponse(
     val tags: List<String>,
     val dueDate: String?,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    val activityLog: List<ActivityLogDTO> = emptyList()
 )

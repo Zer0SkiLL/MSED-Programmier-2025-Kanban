@@ -11,23 +11,28 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import type { Task } from "@/app/page"
-import { Calendar, Clock } from "lucide-react"
+import type { Task, ActivityLog } from "@/lib/api"
+import { Calendar, Clock, Loader2 } from "lucide-react"
+import { activityLogsApi } from "@/lib/api"
 
 type EditTaskDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   task: Task
+  boardId: string
   onUpdate: (taskId: string, task: Partial<Task>) => void
 }
 
-export function EditTaskDialog({ open, onOpenChange, task, onUpdate }: EditTaskDialogProps) {
+export function EditTaskDialog({ open, onOpenChange, task, boardId, onUpdate }: EditTaskDialogProps) {
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description || "")
   const [priority, setPriority] = useState<"low" | "medium" | "high">(task.priority || "medium")
   const [assignee, setAssignee] = useState(task.assignee || "")
   const [dueDate, setDueDate] = useState(task.dueDate || "")
   const [tags, setTags] = useState(task.tags?.join(", ") || "")
+  const [logs, setLogs] = useState<ActivityLog[]>(task.activityLog || [])
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false)
+  const [activeTab, setActiveTab] = useState("details")
 
   useEffect(() => {
     setTitle(task.title)
@@ -36,7 +41,26 @@ export function EditTaskDialog({ open, onOpenChange, task, onUpdate }: EditTaskD
     setAssignee(task.assignee || "")
     setDueDate(task.dueDate || "")
     setTags(task.tags?.join(", ") || "")
+    setLogs(task.activityLog || [])
   }, [task])
+
+  useEffect(() => {
+    if (open && activeTab === "activity") {
+      fetchLogs()
+    }
+  }, [open, activeTab, task.id])
+
+  const fetchLogs = async () => {
+    try {
+      setIsLoadingLogs(true)
+      const fetchedLogs = await activityLogsApi.getForTask(task.id)
+      setLogs(fetchedLogs)
+    } catch (error) {
+      console.error("Failed to fetch activity logs:", error)
+    } finally {
+      setIsLoadingLogs(false)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,7 +87,7 @@ export function EditTaskDialog({ open, onOpenChange, task, onUpdate }: EditTaskD
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="details" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="activity">Activity Log</TabsTrigger>
@@ -139,9 +163,14 @@ export function EditTaskDialog({ open, onOpenChange, task, onUpdate }: EditTaskD
           </TabsContent>
           <TabsContent value="activity" className="mt-4">
             <ScrollArea className="h-[400px] pr-4">
-              {task.activityLog && task.activityLog.length > 0 ? (
+              {isLoadingLogs ? (
+                <div className="flex flex-col items-center justify-center h-[200px] text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                  <p className="text-sm text-muted-foreground">Loading activity...</p>
+                </div>
+              ) : logs && logs.length > 0 ? (
                 <div className="space-y-4">
-                  {[...task.activityLog].reverse().map((log) => (
+                  {[...logs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map((log) => (
                     <div key={log.id} className="flex gap-3 pb-4 border-b border-border last:border-0">
                       <div className="flex-shrink-0 mt-1">
                         <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -151,8 +180,6 @@ export function EditTaskDialog({ open, onOpenChange, task, onUpdate }: EditTaskD
                       <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium">{log.description}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{log.user}</span>
-                          <span>•</span>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             <span>
