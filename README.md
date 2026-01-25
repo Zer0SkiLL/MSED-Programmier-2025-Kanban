@@ -18,6 +18,9 @@ MSED-Programmier-2025-Kanban/
 ├─ frontend/                # Next.js app
 │  ├─ package.json          # npm scripts
 │  └─ app/ ...              # Next.js App Router (pages/components)
+├─ mcp-proxy/               # MCP Proxy server (Node.js)
+│  ├─ index.js              # Entry point
+│  └─ package.json          # npm scripts
 └─ README.md                # This file
 ```
 
@@ -36,6 +39,10 @@ MSED-Programmier-2025-Kanban/
     - Styling: Tailwind CSS
     - Package manager: npm (package-lock.json present)
     - Default dev server port: 3000
+- MCP Proxy
+    - Runtime: Node.js
+    - Entry point: [mcp-proxy/index.js](mcp-proxy/index.js)
+    - Protocol: Model Context Protocol (MCP) via stdio
 
 ## Requirements
 
@@ -66,7 +73,12 @@ MSED-Programmier-2025-Kanban/
 - cd ..\frontend
 - npm install
 
-4) MongoDB
+4) MCP Proxy dependencies
+
+- cd ..\mcp-proxy
+- npm install
+
+5) MongoDB
 
 - Install Docker Desktop locally
 - Run the following command to spin up a container running a MongoDB inside
@@ -88,3 +100,6 @@ You can run backend and frontend in two terminals.
     - cd frontend
     - npm run dev
     - Open: http://localhost:3000
+
+- Start MCP Proxy (optional, for AI/MCP clients)
+    - See [mcp-proxy/README.md](mcp-proxy/README.md) for detailed configuration.
