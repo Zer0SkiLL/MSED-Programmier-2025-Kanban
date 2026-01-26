@@ -82,26 +82,3 @@ Test the MCP server manually:
 ```bash
 echo '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}' | node index.js
 ```
-
-## Benefits of This Architecture
-
-✅ **Clean separation** - MCP server is separate from backend
-✅ **No database access** - MCP proxy only calls REST API
-✅ **Both can run simultaneously** - Backend serves frontend AND MCP
-✅ **Lightweight** - Small Node.js proxy vs heavy Spring Boot
-✅ **Easy to maintain** - Simple HTTP client, no business logic
-✅ **Standard MCP** - Pure MCP implementation, no mixing concerns
-
-## Comparison to Previous Approach
-
-### ❌ Old (Embedded MCP in Backend)
-- Backend had to run in "MCP mode" OR "web mode"
-- Couldn't use website while MCP was active
-- Mixed concerns (REST API + MCP + Database)
-- Complex Spring Boot startup
-
-### ✅ New (Separate MCP Proxy)
-- Backend runs normally (REST API + website)
-- MCP proxy is independent
-- Clear separation of concerns
-- Quick startup, easy debugging
